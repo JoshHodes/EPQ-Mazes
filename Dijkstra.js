@@ -5,4 +5,11 @@ const maze = [
     [0, 0, 0, 0, 0],
     [0, 0, 0, 0, 2],
 ];
-console.log(maze[3][4])
+for (i = 0; i <= 4; i++) {
+    let row = "";
+    for (j = 0; j <= 4; j++) {
+        row += maze[i][j] + " ";
+
+    }
+    console.log(row)
+}
