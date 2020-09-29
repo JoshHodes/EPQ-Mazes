@@ -3,17 +3,40 @@ const maze = [
     [0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 2, 0],
+    [0, 0, 0, 1, 1, 0],
+    [0, 0, 0, 1, 2, 0],
 ];
-const start = [0, 0]
-const end = [5, 4]
-const visited = [start]
-const queue = [start]
 displayMaze(maze);
-findAdjacentSpaces(maze, start, visited);
-console.log(visited)
-console.log(queue)
+
+const start = {
+    x: 0,
+    y: 0,
+    depth: 0
+}
+const end = {
+    x: 5,
+    y: 4
+}
+
+
+console.log(startMaze(maze, start, end))
+
+function startMaze(maze, start, end) {
+    const visited = [start]
+    const queue = [start]
+    while (queue.length > 0) {
+        const currentMazeLocation = queue.shift();
+        const adjacentSpaces = findAdjacentSpaces(maze, currentMazeLocation, visited);
+        const isFound = adjacentSpaces.find(adjacentSpace => adjacentSpace.x === end.x && adjacentSpace.y === end.y);
+        if (isFound) {
+            return isFound.depth;
+        }
+        visited.push(...adjacentSpaces);
+        queue.push(...adjacentSpaces);
+
+    }
+}
+
 
 function displayMaze(maze) {
     for (let i = 0; i <= maze.length - 1; i++) {
@@ -25,70 +48,85 @@ function displayMaze(maze) {
     }
 
 }
+
 //before adding to queue, check that the coordinate to add is not: visited before, out of bounds, or a wall
 function isVisitedCoordinate(visited, coord) {
-
-    return visited.some(visitedCoord => visitedCoord[0] === coord[0] && visitedCoord[1] === coord[1])
+    // change so its .x and .y
+    return visited.some(visitedCoord => visitedCoord.x === coord.x && visitedCoord.y === coord.y)
 }
 function isWall(maze, coord) {
-    return maze[coord[0]][coord[1]] === 1
+    return maze[coord.x][coord.y] === 1
 }
 function isOutOfBounds(maze, direction, coord) {
-    console.log(coord[0])
     if (direction === "up") {
-        return coord[0] < 0
+        return coord.x < 0
     }
 
     if (direction === "left") {
-        return coord[1] < 0
+        return coord.y < 0
     }
 
     if (direction === "down") {
-        return coord[0] > maze.length
+        return coord.x > maze.length - 1
     }
     if (direction === "right") {
-        return coord[1] > maze[0].length
+        return coord.y > maze[0].length - 1
     }
 }
 function isValidCoord(visited, coord, maze, direction) {
-    console.log(!isOutOfBounds(maze, direction, coord))
-    console.log(!isVisitedCoordinate(visited, coord))
-    console.log(!isWall(maze, coord))
     return !isOutOfBounds(maze, direction, coord) && !isVisitedCoordinate(visited, coord) && !isWall(maze, coord)
 }
-function findAdjacentSpaces(maze, coord, visited) {
+function findAdjacentSpaces(maze, currentCoord, visited) {
 
-    const down = [coord[0] + 1, coord[1]];
-    const right = [coord[0], coord[1] + 1];
-    const up = [coord[0] - 1, coord[1]];
-    const left = [coord[0], coord[1] - 1]
+
+    const down = {
+        x: currentCoord.x + 1,
+        y: currentCoord.y,
+        depth: currentCoord.depth + 1
+    }
+
+    const right = {
+        x: currentCoord.x,
+        y: currentCoord.y + 1,
+        depth: currentCoord.depth + 1
+    }
+
+    const up = {
+        x: currentCoord.x - 1,
+        y: currentCoord.y,
+        depth: currentCoord.depth + 1
+    }
+
+    const left = {
+        x: currentCoord.x,
+        y: currentCoord.y - 1,
+        depth: currentCoord.depth + 1
+    }
+
+    const newCoords = [];
 
     if (isValidCoord(visited, down, maze, "down")) {
-        queue.push(down)
-        visited.push(down)
+        newCoords.push(down)
     }
 
     if (isValidCoord(visited, up, maze, "up")) {
-        console.log("up")
-
-        queue.push(up)
-        visited.push(up)
+        newCoords.push(up)
     }
 
     if (isValidCoord(visited, left, maze, "left")) {
-        console.log("left")
-        queue.push(left)
-        visited.push(left)
+        newCoords.push(left)
     }
 
     if (isValidCoord(visited, right, maze, "right")) {
-        console.log("right")
-        queue.push(right)
-        visited.push(right)
+        newCoords.push(right)
     }
-
-
+    return newCoords;
 }
+
+
+
+
+
 // need to be able to find all the legal adjacent spaces, and put them all in a queue
 // keep going until the 2 points in the maze meet
 // a coord is legal if: it does not exceed the boundaries of the maze, and if it is not a source coord, and if it is not a wall,
